@@ -1,0 +1,22 @@
+# build output
+dist/
+# generated types
+.astro/
+*.tsbuildinfo
+
+# dependencies
+node_modules/
+.pnpm-store/
+
+# logs
+npm-debug.log*
+pnpm-debug.log*
+
+# misc
+.env
+.DS_Store
+
+.claude/settings.local.json
+
+# pixel-check: скриншоты и diff
+.ca-workflow/pixel-check/

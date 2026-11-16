@@ -1,0 +1,35 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./typography.css";
+
+/*
+ * Масштабирование от ширины фреймов макета. Все px при сборке становятся rem
+ * (postcss.config.mjs), а корневой font-size = 16px ровно на ширине фрейма,
+ * поэтому вёрстка в px макета пропорционально тянется под любой экран.
+ * Каждый диапазон масштабируется от своего фрейма; самый широкий — без верхней
+ * границы. Числа задаются при старте проекта (.ca-workflow/workflow.md) и
+ * совпадают с src/constants/breakpoints.ts и брейкпоинтами в tokens.css.
+ * Сейчас — заглушка: фреймы 375 / 768 / 1920, границы 768 и 1024.
+ */
+@layer base {
+  html {
+    font-size: calc(100vw / 375 * 16);
+
+    @media (width >= 768px) {
+      font-size: calc(100vw / 768 * 16);
+    }
+
+    @media (width >= 1024px) {
+      font-size: calc(100vw / 1920 * 16);
+    }
+  }
+
+  body {
+    @apply bg-white font-body text-black antialiased;
+  }
+
+  /* <picture class="contents"> (MyImage) отдаёт <source> родителю: во флексе они становятся элементами и получают gap */
+  source {
+    display: none;
+  }
+}

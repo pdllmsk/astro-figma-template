@@ -1,0 +1,128 @@
+---
+import { getImage } from "astro:assets";
+
+import getWidths from "@ui/MyImage/getWidths";
+import getImageSizes from "@ui/MyImage/getImageSizes.js";
+import { imageFormats, fallbackFormat } from "@ui/MyImage/imageFormats";
+
+import {
+  desktopBase,
+  desktopMin,
+  mobileBase,
+  tabletBase,
+  tabletMin,
+} from "@constants/breakpoints.js";
+
+import type { Config } from "@ui/MyImage/getWidths";
+import type { ImageAstro } from "src/types";
+
+interface Props {
+  deskImage: ImageAstro;
+  mobImage: ImageAstro;
+  /** Кадр для планшета; без него — deskImage */
+  tabImage?: ImageAstro;
+  deskImageWidth: number;
+  mobImageWidth: number;
+  /** px на макете 768; без него планшет получает десктопный источник */
+  tabImageWidth?: number;
+  alt?: string;
+  class?: string;
+  /** Классы <img>; по умолчанию картинка по ширине <picture> с высотой по пропорции */
+  imgClass?: string;
+  priority?: boolean;
+  loading?: "lazy" | "eager";
+}
+
+const {
+  deskImage,
+  mobImage,
+  tabImage = deskImage,
+  deskImageWidth,
+  mobImageWidth,
+  tabImageWidth,
+  alt = "",
+  imgClass = "h-auto w-full object-cover",
+  priority = false,
+  loading = "lazy",
+} = Astro.props;
+
+const mobileConfig: Config = [
+  { width: mobImageWidth, breakpoint: tabletMin - 1, base: mobileBase },
+  { origin: mobImage.width },
+];
+const tabConfig: Config | undefined = tabImageWidth
+  ? [
+      { width: tabImageWidth, breakpoint: desktopMin - 1, base: tabletBase },
+      { origin: tabImage.width },
+    ]
+  : undefined;
+const deskConfig: Config = [
+  // Самый широкий фрейм масштабируется без верхней границы (global.css)
+  { width: deskImageWidth, base: desktopBase },
+  { origin: deskImage.width },
+];
+
+const variant = async (image: ImageAstro, config: Config, format: string) => ({
+  image: await getImage({
+    src: image,
+    widths: getWidths(config),
+    format,
+  }),
+  sizes: getImageSizes(config),
+});
+
+const media = `(max-width: ${tabletMin - 1}px)`;
+const tabMedia = `(max-width: ${desktopMin - 1}px)`;
+const formats = [...imageFormats, fallbackFormat];
+const sources = await Promise.all([
+  ...formats.map(async (f) => ({
+    ...(await variant(mobImage, mobileConfig, f)),
+    media,
+  })),
+  ...(tabConfig
+    ? formats.map(async (f) => ({
+        ...(await variant(tabImage, tabConfig, f)),
+        media: tabMedia,
+      }))
+    : []),
+  ...imageFormats.map(async (f) => ({
+    ...(await variant(deskImage, deskConfig, f)),
+    media: undefined,
+  })),
+]);
+const desk = await variant(deskImage, deskConfig, fallbackFormat);
+// getImage кладёт в атрибуты свои loading/decoding/fetchpriority (lazy по умолчанию); при дубле
+// HTML берёт первый, и пропы ниже не действовали — Hero грузился лениво
+const {
+  loading: _loading,
+  decoding: _decoding,
+  fetchpriority: _fetchpriority,
+  ...imgAttributes
+} = desk.image.attributes;
+
+const classes = ["m-0 block", Astro.props.class];
+---
+
+<picture class:list={classes}>
+  {
+    sources.map(({ image, sizes, media }) => (
+      <source
+        srcset={image.srcSet.attribute}
+        sizes={sizes}
+        media={media}
+        type={`image/${image.options.format}`}
+      />
+    ))
+  }
+  <img
+    {...imgAttributes}
+    src={desk.image.src}
+    srcset={desk.image.srcSet.attribute}
+    sizes={desk.sizes}
+    alt={alt}
+    loading={priority ? "eager" : loading}
+    fetchpriority={priority ? "high" : undefined}
+    decoding={priority ? "sync" : "async"}
+    class={imgClass}
+  />
+</picture>

@@ -1,0 +1,16 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import Section from "@ui/Section/Section.astro";
+import Content from "@ui/Content/Content.astro";
+import Text from "@ui/Text/Text.astro";
+
+Astro.response.status = 404;
+---
+
+<PageLayout headData={{ title: "Страница не найдена", noIndex: true }}>
+  <Section variant="withPadding">
+    <Content>
+      <Text as="h1" variant="body">404 — страница не найдена</Text>
+    </Content>
+  </Section>
+</PageLayout>

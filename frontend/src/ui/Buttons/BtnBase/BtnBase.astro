@@ -1,0 +1,68 @@
+---
+import Link from "@ui/Link/Link.astro";
+
+import type { DataAttrs } from "src/types";
+
+// Цвета кнопок макета; заглушка до старта проекта
+const variants = {
+  filled: {
+    base: "",
+    black: "bg-black text-white hover:opacity-80",
+  },
+  bordered: {
+    base: "border border-solid bg-transparent",
+    black: "border-black text-black hover:bg-black/10",
+  },
+} as const;
+
+export type Variant = keyof typeof variants;
+export type Color = Exclude<keyof (typeof variants)[Variant], "base">;
+
+interface Props {
+  variant: Variant;
+  color: Color;
+  class?: string;
+  link?: string;
+  target?: string;
+  ariaLabel?: string;
+  dataAttrs?: DataAttrs;
+}
+
+const {
+  variant = "filled",
+  color = "black",
+  link,
+  target,
+  ariaLabel,
+  dataAttrs,
+} = Astro.props;
+
+const classes = [
+  "flex cursor-pointer items-center justify-center outline-none motion-safe:transition motion-safe:duration-300",
+  variants[variant].base,
+  variants[variant][color],
+  Astro.props.class,
+];
+---
+
+{
+  !link && (
+    <button class:list={classes} {...dataAttrs}>
+      <slot />
+    </button>
+  )
+}
+{
+  link && (
+    <Link
+      href={link}
+      variant="plain"
+      class:list={classes}
+      target={target}
+      ariaLabel={ariaLabel}
+      dataAttrs={dataAttrs}
+    >
+      <slot />
+    </Link>
+  )
+}

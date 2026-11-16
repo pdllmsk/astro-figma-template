@@ -1,0 +1,15 @@
+/*
+ * Текстовые стили макета (Figma Text Styles) как Tailwind-утилиты typo-*.
+ * Стиль целиком: шрифт, размер, высота строки, интервал, регистр.
+ * Работают с вариантами: desk:typo-body. Используются через ui/Text,
+ * список имён синхронизирован с ui/Text/TextVariant.ts.
+ *
+ * ЗАГЛУШКА до старта проекта (AGENTS.md → «Старт проекта»).
+ */
+
+@utility typo-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 400;
+}

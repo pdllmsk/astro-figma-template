@@ -1,0 +1,26 @@
+---
+import "/src/styles/global.css";
+
+import Head from "@components/Head/Head.astro";
+import type { Props as HeadProps } from "@components/Head/Head.astro";
+
+interface Props {
+  headData: HeadProps;
+  lang?: string;
+  dir?: "ltr" | "rtl";
+}
+
+const { headData, lang = "ru", dir = "ltr" } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang} dir={dir}>
+  <Head {...headData} />
+  <body class="relative flex min-h-screen w-full flex-col">
+    <slot name="header" />
+    <main class="w-full grow overflow-clip">
+      <slot />
+    </main>
+    <slot name="footer" />
+  </body>
+</html>

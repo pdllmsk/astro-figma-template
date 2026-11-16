@@ -1,0 +1,61 @@
+---
+import { FRONTEND_SITE } from "astro:env/server";
+
+export interface Props {
+  url?: string;
+  title?: string;
+  siteName?: string;
+  description?: string;
+  imageUrl?: string;
+}
+
+const {
+  title,
+  siteName,
+  url = "",
+  description,
+  imageUrl = "/og.jpg",
+} = Astro.props;
+
+function isAbsoluteURL(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch (e) {
+    return false;
+  }
+}
+
+const currentUrl = FRONTEND_SITE;
+
+const absUrl = url
+  ? isAbsoluteURL(url)
+    ? url
+    : new URL(url, currentUrl).href
+  : Astro.url.href;
+
+const ogImgWithUrl = imageUrl
+  ? isAbsoluteURL(imageUrl)
+    ? imageUrl
+    : new URL(imageUrl, currentUrl).href
+  : null;
+---
+
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="ru_RU" />
+
+{absUrl && <meta property="og:url" content={absUrl} />}
+{title && <meta property="og:title" content={title} />}
+{description && <meta property="og:description" content={description} />}
+{siteName && <meta property="og:site_name" content={siteName} />}
+{
+  ogImgWithUrl && (
+    <Fragment>
+      <meta property="og:image" content={ogImgWithUrl} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:image" content={ogImgWithUrl} />
+    </Fragment>
+  )
+}

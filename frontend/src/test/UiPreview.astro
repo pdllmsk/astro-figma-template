@@ -1,0 +1,81 @@
+---
+// Витрина ui-компонентов (/test/preview): каждый ui-компонент со всеми вариантами.
+// Новый ui-компонент добавляется сюда, моки — в ui/<Name>/test/.
+import Section from "@ui/Section/Section.astro";
+import Content from "@ui/Content/Content.astro";
+import Stack from "@ui/Stack/Stack.astro";
+import Text from "@ui/Text/Text.astro";
+import TextVariant from "@ui/Text/TextVariant";
+import type { Color, Variant } from "@ui/Text/Text.astro";
+import BtnBase from "@ui/Buttons/BtnBase/BtnBase.astro";
+import Link from "@ui/Link/Link.astro";
+
+const textVariants = Object.keys(TextVariant) as Variant[];
+const colors: Color[] = ["black", "white"];
+const boxes = ["1", "2", "3"];
+---
+
+<Section variant="withPadding">
+  <Content>
+    <Stack gap={{ base: 48, desk: 80 }}>
+      <Stack as="section" gap={24}>
+        <Text as="h2" variant="body">Text (ui/Text)</Text>
+        <Stack gap={12}>
+          {
+            textVariants.map((variant) => (
+              <Text variant={variant}>
+                {variant}: Съешь же ещё этих мягких булок 1234
+              </Text>
+            ))
+          }
+        </Stack>
+        <Stack direction="row" wrap="wrap" gap={24} p={16} class="bg-black/10">
+          {
+            colors.map((color) => (
+              <Text variant="body" color={color}>
+                {color}
+              </Text>
+            ))
+          }
+        </Stack>
+      </Stack>
+
+      <Stack as="section" gap={24}>
+        <Text as="h2" variant="body">Stack (ui/Stack)</Text>
+        <Text variant="body"
+          >direction column → row, gap 12 → 48, padding 24</Text
+        >
+        <Stack
+          direction={{ base: "column", desk: "row" }}
+          gap={{ base: 12, desk: 48 }}
+          p={24}
+          class="border border-black"
+        >
+          {
+            boxes.map((box) => (
+              <Stack p={24} class="grow bg-black/10">
+                <Text variant="body">Блок {box}</Text>
+              </Stack>
+            ))
+          }
+        </Stack>
+      </Stack>
+
+      <Stack as="section" gap={24}>
+        <Text as="h2" variant="body">BtnBase, Link (ui/Buttons, ui/Link)</Text>
+        <Stack direction="row" wrap="wrap" align="center" gap={24}>
+          <BtnBase class="px-6 py-3" variant="filled" color="black"
+            >filled</BtnBase
+          >
+          <BtnBase class="px-6 py-3" variant="bordered" color="black"
+            >bordered</BtnBase
+          >
+          <BtnBase class="px-6 py-3" variant="filled" color="black" link="#"
+            >ссылка-кнопка</BtnBase
+          >
+          <Link href="#">Link</Link>
+        </Stack>
+      </Stack>
+    </Stack>
+  </Content>
+</Section>

@@ -1,0 +1,77 @@
+---
+import { Picture } from "astro:assets";
+
+import {
+  mobileBase,
+  tabletBase,
+  tabletMin,
+  desktopBase,
+  desktopMin,
+} from "@constants/breakpoints.js";
+
+import getWidths from "./getWidths";
+import type { Config } from "./getWidths";
+import getImageSizes from "./getImageSizes";
+import { imageFormats, fallbackFormat } from "./imageFormats";
+import type { DataAttrs, ImageAstro } from "src/types";
+
+interface Props {
+  image: ImageAstro;
+  imageDeskWidth: number;
+  /** px на макете 768; без него планшет берёт размер от десктопа */
+  imageTabWidth?: number;
+  imageMobWidth?: number;
+  loading?: "lazy" | "eager";
+  dataAttrs?: DataAttrs;
+  priority?: boolean;
+  alt?: string;
+  title?: string;
+  class?: string;
+}
+
+const {
+  image,
+  imageMobWidth,
+  imageTabWidth,
+  imageDeskWidth,
+  alt = "",
+  title,
+  dataAttrs,
+  loading = "lazy",
+  priority = false,
+} = Astro.props;
+
+if (!image)
+  throw new Error("MyImage: image обязателен (передавай image import).");
+if (!imageMobWidth && !imageDeskWidth)
+  throw new Error("MyImage: нужно задать imageMobWidth и imageDeskWidth.");
+
+const config = [
+  { width: imageMobWidth, breakpoint: tabletMin - 1, base: mobileBase },
+  { width: imageTabWidth, breakpoint: desktopMin - 1, base: tabletBase },
+  // Самый широкий фрейм масштабируется без верхней границы (global.css)
+  { width: imageDeskWidth, base: desktopBase },
+  { origin: image.width },
+].filter((v) => v.width || v.origin) as Config;
+
+const sizes = getImageSizes(config);
+const widths = getWidths(config);
+// SVG и GIF не перекодируем: растр SVG теряет чёткость, GIF — анимацию
+const keepFormat = image.format === "svg" || image.format === "gif";
+// contents: <picture> не участвует в раскладке, классы и data-* остаются на <img>
+---
+
+<Picture
+  src={image}
+  formats={keepFormat ? [] : imageFormats}
+  fallbackFormat={keepFormat ? image.format : fallbackFormat}
+  pictureAttributes={{ class: "contents" }}
+  alt={alt}
+  widths={widths}
+  sizes={sizes}
+  loading={loading}
+  priority={priority}
+  class={Astro.props.class}
+  title={title}
+  {...dataAttrs}
+/>

@@ -1,0 +1,29 @@
+---
+import type { DataAttrs } from "src/types";
+
+const variants = {
+  // Вертикальный отступ секции из макета; заглушка до старта проекта
+  withPadding: "py-section",
+} as const;
+
+type Variant = keyof typeof variants;
+
+interface Props {
+  id?: string;
+  class?: string;
+  variant?: Variant;
+  dataAttrs?: DataAttrs;
+}
+
+const { id, dataAttrs = {}, variant } = Astro.props;
+
+const classes = [
+  "relative flex w-full flex-col items-stretch",
+  variant && variants[variant],
+  Astro.props.class,
+];
+---
+
+<section id={id} class:list={classes} {...dataAttrs}>
+  <slot />
+</section>

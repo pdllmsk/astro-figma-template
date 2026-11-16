@@ -1,0 +1,18 @@
+{
+  "name": "astro-figma-template",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@11.28.5",
+  "scripts": {
+    "start": "dotenv -e .env -- pnpm --filter frontend run start",
+    "build": "dotenv -e .env -- pnpm --filter frontend run build",
+    "build:static": "dotenv -e .env -- pnpm --filter frontend run build:static",
+    "build:test": "pnpm run build && cd frontend && dotenv -e ../.env -- node dist/server/entry.mjs",
+    "check": "dotenv -e .env -- pnpm --filter frontend run check",
+    "prettier": "pnpm --filter frontend run prettier"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0",
+    "prettier": "^3.7.1"
+  }
+}

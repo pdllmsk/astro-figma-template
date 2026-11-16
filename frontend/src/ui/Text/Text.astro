@@ -1,0 +1,91 @@
+---
+// Текст по стилям макета. Тег задаётся через as (семантика),
+// внешний вид — через variant (адаптивный) и color (токены).
+import type { HTMLTag, Polymorphic } from "astro/types";
+
+import { responsiveClasses, type Responsive } from "@utils/responsive";
+
+import TextVariant from "./TextVariant";
+import type { Variant } from "./TextVariant";
+
+export type { Variant };
+
+// Цвета текста — токены из tokens.css
+const colors = {
+  white: "text-white",
+  black: "text-black",
+} as const;
+
+const aligns = {
+  left: ["text-left", "tab:text-left", "desk:text-left"],
+  center: ["text-center", "tab:text-center", "desk:text-center"],
+  right: ["text-right", "tab:text-right", "desk:text-right"],
+} as const;
+
+const whiteSpaces = {
+  normal: [
+    "whitespace-normal",
+    "tab:whitespace-normal",
+    "desk:whitespace-normal",
+  ],
+  nowrap: [
+    "whitespace-nowrap",
+    "tab:whitespace-nowrap",
+    "desk:whitespace-nowrap",
+  ],
+  pre: ["whitespace-pre", "tab:whitespace-pre", "desk:whitespace-pre"],
+  "pre-line": [
+    "whitespace-pre-line",
+    "tab:whitespace-pre-line",
+    "desk:whitespace-pre-line",
+  ],
+  "pre-wrap": [
+    "whitespace-pre-wrap",
+    "tab:whitespace-pre-wrap",
+    "desk:whitespace-pre-wrap",
+  ],
+  balance: ["text-balance", "tab:text-balance", "desk:text-balance"],
+} as const;
+
+export type Color = keyof typeof colors;
+
+type Props<Tag extends HTMLTag = "p"> = Polymorphic<{ as: Tag }> & {
+  variant: Responsive<Variant>;
+  color?: Color;
+  align?: Responsive<keyof typeof aligns>;
+  whiteSpace?: Responsive<keyof typeof whiteSpaces>;
+  html?: string;
+};
+
+const {
+  as,
+  variant,
+  color,
+  align,
+  whiteSpace,
+  html,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const Tag = as ?? "p";
+
+const classes = [
+  "m-0 p-0",
+  ...responsiveClasses(variant, TextVariant),
+  color && colors[color],
+  ...responsiveClasses(align, aligns),
+  ...responsiveClasses(whiteSpace, whiteSpaces),
+  className,
+];
+---
+
+{
+  html ? (
+    <Tag class:list={classes} set:html={html} {...rest} />
+  ) : (
+    <Tag class:list={classes} {...rest}>
+      <slot />
+    </Tag>
+  )
+}

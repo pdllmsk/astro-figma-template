@@ -1,0 +1,39 @@
+/*
+ * Дизайн-токены макета: единственное место, где задаются брейкпоинты, цвета,
+ * шрифты, текстовые стили, тени и ширины контейнеров.
+ *
+ * ЗАГЛУШКА. Заполняется из Figma при старте проекта (AGENTS.md → «Старт
+ * проекта»): у каждого токена — комментарий, откуда он (переменная Figma или
+ * блок, где встретился). Пока здесь заглушка, блоки не верстаются.
+ *
+ * Все размеры — в px как в макете. При сборке postcss-pxtorem переводит их
+ * в rem, а корневой font-size масштабируется от ширины экрана (global.css).
+ */
+
+@theme {
+  /* Брейкпоинты: мобилка по умолчанию, tab: — с границы планшета, desk: — с границы десктопа */
+  --breakpoint-*: initial;
+  --breakpoint-tab: 768px;
+  --breakpoint-desk: 1024px;
+
+  /* Цвета */
+  --color-*: initial;
+  --color-white: #fff;
+  --color-black: #000;
+
+  /* Шрифты: переменные из experimental.fonts (astro.config.mjs) */
+  --font-body: system-ui, sans-serif;
+
+  /* Размеры текста: Figma Text Styles. Стиль целиком — утилиты typo-* в typography.css */
+  --text-*: initial;
+  --text-body: 16px;
+  --text-body--line-height: 20px;
+
+  /* Вертикальный отступ секции */
+  --spacing-section: 144px;
+
+  /* Ширины контентных колонок */
+  --container-content-mob: 343px;
+  --container-content-tab: 640px;
+  --container-content: 1600px;
+}

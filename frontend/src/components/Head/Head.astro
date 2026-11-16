@@ -1,0 +1,77 @@
+---
+import { ClientRouter } from "astro:transitions";
+import { FRONTEND_SITE, NOINDEX } from "astro:env/server";
+
+import Favicon from "./parts/Favicon/Favicon.astro";
+import OpenGraph from "./parts/OpenGraph/OpenGraph.astro";
+
+export interface Props {
+  title: string;
+  description?: string;
+  siteName?: string;
+  ogImageUrl?: string;
+  noIndex?: boolean;
+  // Языковые версии страницы для hreflang
+  alternates?: { hreflang: string; href: string }[];
+  // Структурированные данные Schema.org
+  jsonLd?: object[];
+}
+
+const {
+  title,
+  description,
+  siteName,
+  ogImageUrl,
+  noIndex,
+  alternates = [],
+  jsonLd = [],
+} = Astro.props;
+const indexable = !noIndex && !NOINDEX;
+
+const canonicalUrl = new URL(Astro.url.pathname, FRONTEND_SITE).href;
+---
+
+<head>
+  {!indexable && <meta name="robots" content="noindex, nofollow" />}
+  <meta charset="utf-8" />
+  <title>{title}</title>
+  {description && <meta content={description} name="description" />}
+  <link rel="canonical" href={canonicalUrl} />
+  {
+    indexable &&
+      alternates.map(({ hreflang, href }) => (
+        <link
+          rel="alternate"
+          hreflang={hreflang}
+          href={new URL(href, FRONTEND_SITE).href}
+        />
+      ))
+  }
+  {
+    indexable && jsonLd.length > 0 && (
+      <script
+        is:inline
+        type="application/ld+json"
+        set:html={JSON.stringify(jsonLd).replace(/</g, "\\u003c")}
+      />
+    )
+  }
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta content="telephone=no" name="format-detection" />
+
+  <Favicon />
+
+  <OpenGraph
+    url={canonicalUrl}
+    title={title}
+    siteName={siteName}
+    description={description}
+    imageUrl={ogImageUrl}
+  />
+
+  <!-- Шрифты макета: по <Font> на каждый из experimental.fonts (astro.config.mjs) -->
+  <!-- <Font cssVariable="--font-…" preload /> -->
+
+  <ClientRouter />
+</head>

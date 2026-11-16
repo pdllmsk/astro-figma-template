@@ -1,0 +1,29 @@
+---
+import type { DataAttrs } from "src/types";
+
+const variants = {
+  default: "w-content-mob tab:w-content-tab desk:w-content",
+  // во всю ширину до десктопа
+  wide: "w-full desk:w-content",
+} as const;
+
+type Variant = keyof typeof variants;
+
+interface Props {
+  class?: string;
+  variant?: Variant;
+  dataAttrs?: DataAttrs;
+}
+
+const { dataAttrs = {}, variant = "default" } = Astro.props;
+
+const classes = [
+  "mx-auto flex flex-col items-stretch",
+  variants[variant],
+  Astro.props.class,
+];
+---
+
+<div class:list={classes} {...dataAttrs}>
+  <slot />
+</div>

@@ -1,0 +1,65 @@
+---
+import type { DataAttrs } from "src/types";
+
+// plain — без смены цвета при наведении (hover задаёт обёртка)
+const variants = {
+  default: "hover:opacity-70",
+  plain: "",
+} as const;
+
+export interface Props {
+  href: string;
+  variant?: keyof typeof variants;
+  class?: string;
+  target?: string;
+  ariaLabel?: string;
+  prefetch?: boolean;
+  dataAttrs?: DataAttrs;
+}
+
+const {
+  href,
+  variant = "default",
+  target,
+  ariaLabel,
+  prefetch = true,
+  dataAttrs = {},
+} = Astro.props;
+
+interface ExtraAttrs {
+  target?: string;
+  rel?: string;
+  "data-astro-prefetch": boolean;
+}
+
+const extraAttrs: ExtraAttrs = { "data-astro-prefetch": prefetch };
+
+if (target) {
+  extraAttrs.target = target;
+
+  if (target === "_blank") {
+    extraAttrs["data-astro-prefetch"] = false;
+    extraAttrs.rel = "noopener noreferrer";
+  }
+}
+
+const classes = [
+  "text-current no-underline transition-colors duration-300",
+  variants[variant],
+  Astro.props.class,
+];
+---
+
+<a
+  href={href}
+  class:list={classes}
+  aria-label={ariaLabel}
+  {...extraAttrs}
+  {...dataAttrs}><slot /></a
+>
+
+<script>
+  import { componentInit } from "@utils/componentInit";
+  import anchorLinkInit from "./Link.js";
+  componentInit(anchorLinkInit);
+</script>

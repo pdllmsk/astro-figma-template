@@ -1,0 +1,164 @@
+---
+// Flex-контейнер по мотивам Figma auto-layout: направление, gap, padding,
+// выравнивание. Значения отступов — px из шкалы Figma (constants/space.ts).
+import type { HTMLTag, Polymorphic } from "astro/types";
+
+import type { Space } from "@constants/space";
+import {
+  pxToRem,
+  responsiveClasses,
+  toBreakpointMap,
+  type Responsive,
+} from "@utils/responsive";
+
+const directions = {
+  row: ["flex-row", "tab:flex-row", "desk:flex-row"],
+  column: ["flex-col", "tab:flex-col", "desk:flex-col"],
+  "row-reverse": [
+    "flex-row-reverse",
+    "tab:flex-row-reverse",
+    "desk:flex-row-reverse",
+  ],
+  "column-reverse": [
+    "flex-col-reverse",
+    "tab:flex-col-reverse",
+    "desk:flex-col-reverse",
+  ],
+} as const;
+
+const aligns = {
+  start: ["items-start", "tab:items-start", "desk:items-start"],
+  center: ["items-center", "tab:items-center", "desk:items-center"],
+  end: ["items-end", "tab:items-end", "desk:items-end"],
+  stretch: ["items-stretch", "tab:items-stretch", "desk:items-stretch"],
+  baseline: ["items-baseline", "tab:items-baseline", "desk:items-baseline"],
+} as const;
+
+const justifies = {
+  start: ["justify-start", "tab:justify-start", "desk:justify-start"],
+  center: ["justify-center", "tab:justify-center", "desk:justify-center"],
+  end: ["justify-end", "tab:justify-end", "desk:justify-end"],
+  between: ["justify-between", "tab:justify-between", "desk:justify-between"],
+  around: ["justify-around", "tab:justify-around", "desk:justify-around"],
+} as const;
+
+const wraps = {
+  nowrap: ["flex-nowrap", "tab:flex-nowrap", "desk:flex-nowrap"],
+  wrap: ["flex-wrap", "tab:flex-wrap", "desk:flex-wrap"],
+} as const;
+
+// Каждому отступу — свои CSS-переменные и классы, читающие их
+const spaceProps = {
+  gap: [
+    "gap-(--stack-gap)",
+    "tab:gap-(--stack-gap-tab)",
+    "desk:gap-(--stack-gap-desk)",
+  ],
+  pt: [
+    "pt-(--stack-pt)",
+    "tab:pt-(--stack-pt-tab)",
+    "desk:pt-(--stack-pt-desk)",
+  ],
+  pr: [
+    "pr-(--stack-pr)",
+    "tab:pr-(--stack-pr-tab)",
+    "desk:pr-(--stack-pr-desk)",
+  ],
+  pb: [
+    "pb-(--stack-pb)",
+    "tab:pb-(--stack-pb-tab)",
+    "desk:pb-(--stack-pb-desk)",
+  ],
+  pl: [
+    "pl-(--stack-pl)",
+    "tab:pl-(--stack-pl-tab)",
+    "desk:pl-(--stack-pl-desk)",
+  ],
+} as const;
+
+type SpaceProp = keyof typeof spaceProps;
+
+type Props<Tag extends HTMLTag = "div"> = Polymorphic<{ as: Tag }> & {
+  direction?: Responsive<keyof typeof directions>;
+  align?: Responsive<keyof typeof aligns>;
+  justify?: Responsive<keyof typeof justifies>;
+  wrap?: Responsive<keyof typeof wraps>;
+  gap?: Responsive<Space>;
+  p?: Responsive<Space>;
+  px?: Responsive<Space>;
+  py?: Responsive<Space>;
+  pt?: Responsive<Space>;
+  pr?: Responsive<Space>;
+  pb?: Responsive<Space>;
+  pl?: Responsive<Space>;
+};
+
+const {
+  as,
+  direction = "column",
+  align,
+  justify,
+  wrap,
+  gap,
+  p,
+  px,
+  py,
+  pt,
+  pr,
+  pb,
+  pl,
+  class: className,
+  style,
+  ...rest
+} = Astro.props;
+
+const Tag = as ?? "div";
+
+// Частное значение важнее общего: pt > py > p
+const spaceValues: Record<SpaceProp, Responsive<Space> | undefined> = {
+  gap,
+  pt: pt ?? py ?? p,
+  pr: pr ?? px ?? p,
+  pb: pb ?? py ?? p,
+  pl: pl ?? px ?? p,
+};
+
+const spaceClasses: string[] = [];
+const spaceVars: string[] = [];
+
+for (const prop of Object.keys(spaceProps) as SpaceProp[]) {
+  const { base, tab, desk } = toBreakpointMap(spaceValues[prop]);
+  const [baseClass, tabClass, deskClass] = spaceProps[prop];
+
+  if (base !== undefined) {
+    spaceClasses.push(baseClass);
+    spaceVars.push(`--stack-${prop}: ${pxToRem(base)}`);
+  }
+  if (tab !== undefined) {
+    spaceClasses.push(tabClass);
+    spaceVars.push(`--stack-${prop}-tab: ${pxToRem(tab)}`);
+  }
+  if (desk !== undefined) {
+    spaceClasses.push(deskClass);
+    spaceVars.push(`--stack-${prop}-desk: ${pxToRem(desk)}`);
+  }
+}
+
+const classes = [
+  "flex",
+  ...responsiveClasses(direction, directions),
+  ...responsiveClasses(align, aligns),
+  ...responsiveClasses(justify, justifies),
+  ...responsiveClasses(wrap, wraps),
+  ...spaceClasses,
+  className,
+];
+
+const inlineStyle = [...spaceVars, typeof style === "string" && style]
+  .filter(Boolean)
+  .join("; ");
+---
+
+<Tag class:list={classes} style={inlineStyle || undefined} {...rest}>
+  <slot />
+</Tag>
